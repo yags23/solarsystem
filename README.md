@@ -15,6 +15,30 @@ Then open the local URL Vite prints, usually:
 http://localhost:5173/
 ```
 
+## Publish on GitHub Pages
+
+Do not open `index.html` directly from the GitHub file viewer. GitHub will show the source file, and the browser will not build the React/Vite app.
+
+This project includes a GitHub Actions workflow at:
+
+```text
+.github/workflows/deploy.yml
+```
+
+To publish:
+
+1. Push the project files to GitHub.
+2. Go to the repository's **Settings -> Pages**.
+3. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+4. Wait for the **Deploy to GitHub Pages** action to finish.
+5. Open the Pages URL, for example:
+
+```text
+https://yags23.github.io/solarsystem/
+```
+
+The `vite.config.js` file uses `base: "./"` so the built app works from the `/solarsystem/` GitHub Pages path.
+
 ## Teacher Editing Notes
 
 Planet and mission data live in:
