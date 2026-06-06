@@ -51,13 +51,27 @@ To update facts, edit the objects in `SOLAR_SYSTEM_OBJECTS`. The 3D scene reads 
 
 ## Texture Notes
 
-This project uses procedural canvas textures so it works without paid APIs or downloaded image assets. To add NASA/public-domain textures later, replace the material creation logic in:
+This project uses local real planet texture images stored in:
 
 ```text
-src/utils/createPlanetTexture.js
+public/textures/
 ```
 
-NASA public-domain texture sources can be added as local image files in `src/assets/` and loaded with `THREE.TextureLoader`.
+Each planet points to its texture filename in:
+
+```text
+src/data/solarSystemData.js
+```
+
+To update a planet image later, replace the matching file in `public/textures/` or change the `texture`, `cloudTexture`, or `ringTexture` filename in the planet data object.
+
+Texture source: the included planet maps are from the free Solar System Scope texture library:
+
+```text
+https://www.solarsystemscope.com/textures/
+```
+
+The older procedural canvas texture helper remains in `src/utils/createPlanetTexture.js` as a fallback if a planet does not have a local texture file.
 
 ## Scale Modes
 

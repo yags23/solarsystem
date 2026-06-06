@@ -6,6 +6,7 @@
   - Diameters and distances are approximate classroom-friendly values.
   - "classroomDistance" and "classroomRadius" are visual values used by the 3D scene.
   - "relativeDistance" is still simplified; true Solar System distances are too large for a normal classroom navigation model.
+  - Texture files live in public/textures. To update a planet image, replace that file or change the texture filename below.
 */
 
 export const SCALE_MODES = {
@@ -47,6 +48,7 @@ export const SOLAR_SYSTEM_OBJECTS = [
     relativeSizeRadius: 7.5,
     colorA: "#ffd15f",
     colorB: "#ff7b1a",
+    texture: "sun.jpg",
     emissive: true
   },
   {
@@ -68,7 +70,8 @@ export const SOLAR_SYSTEM_OBJECTS = [
     classroomRadius: 0.42,
     relativeSizeRadius: 0.38,
     colorA: "#9d9185",
-    colorB: "#4c4744"
+    colorB: "#4c4744",
+    texture: "mercury.jpg"
   },
   {
     id: "venus",
@@ -89,7 +92,8 @@ export const SOLAR_SYSTEM_OBJECTS = [
     classroomRadius: 0.72,
     relativeSizeRadius: 0.95,
     colorA: "#e8bd67",
-    colorB: "#a9672f"
+    colorB: "#a9672f",
+    texture: "venus.jpg"
   },
   {
     id: "earth",
@@ -111,6 +115,8 @@ export const SOLAR_SYSTEM_OBJECTS = [
     relativeSizeRadius: 1,
     colorA: "#2a7bd8",
     colorB: "#52b56d",
+    texture: "earth_day.jpg",
+    cloudTexture: "earth_clouds.jpg",
     hasClouds: true
   },
   {
@@ -133,6 +139,7 @@ export const SOLAR_SYSTEM_OBJECTS = [
     relativeSizeRadius: 0.27,
     colorA: "#d7d3c9",
     colorB: "#79766e",
+    texture: "moon.jpg",
     parentId: "earth",
     moonDistance: 2.6
   },
@@ -155,7 +162,8 @@ export const SOLAR_SYSTEM_OBJECTS = [
     classroomRadius: 0.62,
     relativeSizeRadius: 0.53,
     colorA: "#ca5a35",
-    colorB: "#6e2d21"
+    colorB: "#6e2d21",
+    texture: "mars.jpg"
   },
   {
     id: "jupiter",
@@ -177,6 +185,7 @@ export const SOLAR_SYSTEM_OBJECTS = [
     relativeSizeRadius: 4.1,
     colorA: "#d7a56b",
     colorB: "#7c4e35",
+    texture: "jupiter.jpg",
     banded: true
   },
   {
@@ -199,6 +208,8 @@ export const SOLAR_SYSTEM_OBJECTS = [
     relativeSizeRadius: 3.75,
     colorA: "#e9cf8b",
     colorB: "#9d7745",
+    texture: "saturn.jpg",
+    ringTexture: "saturn_ring_alpha.png",
     hasRings: true,
     banded: true
   },
@@ -221,7 +232,8 @@ export const SOLAR_SYSTEM_OBJECTS = [
     classroomRadius: 1.25,
     relativeSizeRadius: 2.1,
     colorA: "#9de3e4",
-    colorB: "#3b9fa5"
+    colorB: "#3b9fa5",
+    texture: "uranus.jpg"
   },
   {
     id: "neptune",
@@ -242,7 +254,8 @@ export const SOLAR_SYSTEM_OBJECTS = [
     classroomRadius: 1.2,
     relativeSizeRadius: 2,
     colorA: "#366bde",
-    colorB: "#142b8f"
+    colorB: "#142b8f",
+    texture: "neptune.jpg"
   }
 ];
 

@@ -5,6 +5,22 @@ import { PLANETS, SOLAR_SYSTEM_OBJECTS } from "../data/solarSystemData";
 import { createCloudTexture, createLabelTexture, createPlanetTexture } from "../utils/createPlanetTexture";
 import { getDisplayDistance, getDisplayRadius, getOrbitSpeed } from "../utils/sceneScale";
 
+const TEXTURE_BASE_PATH = `${import.meta.env.BASE_URL}textures/`;
+const textureLoader = new THREE.TextureLoader();
+const textureCache = new Map();
+
+function loadSceneTexture(fileName, colorSpace = THREE.SRGBColorSpace) {
+  if (!fileName) return null;
+  if (textureCache.has(fileName)) return textureCache.get(fileName);
+
+  const texture = textureLoader.load(`${TEXTURE_BASE_PATH}${fileName}`);
+  texture.colorSpace = colorSpace;
+  texture.anisotropy = 8;
+  texture.userData.fromTextureFile = true;
+  textureCache.set(fileName, texture);
+  return texture;
+}
+
 function makeOrbitLine(distance, color = "#78d6ff", opacity = 0.35) {
   const points = [];
   const segments = 192;
@@ -56,12 +72,12 @@ function makeStarField() {
 
 function createPlanetMesh(object) {
   const geometry = new THREE.SphereGeometry(1, object.id === "sun" ? 64 : 48, object.id === "sun" ? 64 : 32);
-  const texture = createPlanetTexture(object);
+  const texture = object.texture ? loadSceneTexture(object.texture) : createPlanetTexture(object);
   const material = object.emissive
     ? new THREE.MeshBasicMaterial({ map: texture })
     : new THREE.MeshStandardMaterial({
         map: texture,
-        roughness: 0.78,
+        roughness: object.id === "earth" ? 0.48 : 0.78,
         metalness: 0.02
       });
   const mesh = new THREE.Mesh(geometry, material);
@@ -70,24 +86,43 @@ function createPlanetMesh(object) {
 
   if (object.hasClouds) {
     const cloudGeometry = new THREE.SphereGeometry(1.018, 48, 32);
+    const cloudTexture = object.cloudTexture ? loadSceneTexture(object.cloudTexture) : createCloudTexture();
     const cloudMaterial = new THREE.MeshStandardMaterial({
-      map: createCloudTexture(),
+      map: cloudTexture,
       transparent: true,
-      opacity: 0.38,
-      depthWrite: false
+      opacity: 0.42,
+      depthWrite: false,
+      roughness: 0.72
     });
     const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
     clouds.userData.cloudLayer = true;
     mesh.add(clouds);
   }
 
+  if (object.id === "earth") {
+    const atmosphereGeometry = new THREE.SphereGeometry(1.055, 48, 32);
+    const atmosphereMaterial = new THREE.MeshBasicMaterial({
+      color: "#78d6ff",
+      transparent: true,
+      opacity: 0.16,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+    atmosphere.userData.atmosphere = true;
+    mesh.add(atmosphere);
+  }
+
   if (object.hasRings) {
     const ringGeometry = new THREE.RingGeometry(1.38, 2.18, 128);
+    const alphaMap = object.ringTexture ? loadSceneTexture(object.ringTexture, THREE.NoColorSpace) : null;
     const ringMaterial = new THREE.MeshStandardMaterial({
       color: "#efdca4",
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.72,
+      opacity: 0.86,
+      alphaMap,
       roughness: 0.8
     });
     const rings = new THREE.Mesh(ringGeometry, ringMaterial);
@@ -421,7 +456,11 @@ export default function SolarSystemScene({
         if (object.material) {
           const materials = Array.isArray(object.material) ? object.material : [object.material];
           materials.forEach((material) => {
-            if (material.map) material.map.dispose();
+            ["map", "alphaMap", "normalMap", "roughnessMap", "metalnessMap"].forEach((textureKey) => {
+              if (material[textureKey] && !material[textureKey].userData?.fromTextureFile) {
+                material[textureKey].dispose();
+              }
+            });
             material.dispose();
           });
         }
