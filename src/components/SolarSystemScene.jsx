@@ -77,9 +77,14 @@ function createPlanetMesh(object) {
     ? new THREE.MeshBasicMaterial({ map: texture })
     : new THREE.MeshStandardMaterial({
         map: texture,
-        roughness: object.id === "earth" ? 0.48 : 0.78,
-        metalness: 0.02
+        roughness: object.id === "earth" ? 0.42 : 0.78,
+        metalness: 0.02,
+        emissive: object.id === "earth" ? new THREE.Color("#ffffff") : new THREE.Color("#000000"),
+        emissiveMap: object.id === "earth" ? texture : null,
+        emissiveIntensity: object.id === "earth" ? 0.08 : 0
       });
+  material.userData.baseEmissiveColor = object.id === "earth" ? "#ffffff" : "#000000";
+  material.userData.baseEmissiveIntensity = object.id === "earth" ? 0.08 : 0;
   const mesh = new THREE.Mesh(geometry, material);
   mesh.name = object.name;
   mesh.userData.objectId = object.id;
@@ -90,7 +95,7 @@ function createPlanetMesh(object) {
     const cloudMaterial = new THREE.MeshStandardMaterial({
       map: cloudTexture,
       transparent: true,
-      opacity: 0.42,
+      opacity: 0.2,
       depthWrite: false,
       roughness: 0.72
     });
@@ -104,7 +109,7 @@ function createPlanetMesh(object) {
     const atmosphereMaterial = new THREE.MeshBasicMaterial({
       color: "#78d6ff",
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.11,
       side: THREE.BackSide,
       blending: THREE.AdditiveBlending,
       depthWrite: false
@@ -139,7 +144,8 @@ function createLabelSprite(text) {
     map: createLabelTexture(text),
     transparent: true,
     depthTest: false,
-    depthWrite: false
+    depthWrite: false,
+    toneMapped: false
   });
   const sprite = new THREE.Sprite(material);
   sprite.renderOrder = 10;
@@ -203,13 +209,13 @@ export default function SolarSystemScene({
     });
 
     scene.add(makeStarField());
-    scene.add(new THREE.AmbientLight("#8aa4ff", 0.44));
+    scene.add(new THREE.AmbientLight("#8aa4ff", 0.28));
 
-    const sunlight = new THREE.PointLight("#fff2c7", 4.8, 520, 1.25);
+    const sunlight = new THREE.PointLight("#fff2c7", 5.6, 520, 1.25);
     sunlight.position.set(0, 0, 0);
     scene.add(sunlight);
 
-    const rimLight = new THREE.DirectionalLight("#9fd6ff", 0.7);
+    const rimLight = new THREE.DirectionalLight("#9fd6ff", 0.9);
     rimLight.position.set(-30, 22, -40);
     scene.add(rimLight);
 
@@ -274,7 +280,7 @@ export default function SolarSystemScene({
       const sunRadius = getDisplayRadius(sun, mode);
       sunMesh.scale.setScalar(sunRadius);
       objectRefs.get("sun").label.position.set(0, sunRadius + 2, 0);
-      objectRefs.get("sun").label.scale.set(7, 3, 1);
+      objectRefs.get("sun").label.scale.set(5.8, 2.18, 1);
 
       PLANETS.forEach((planet) => {
         const ref = objectRefs.get(planet.id);
@@ -283,7 +289,7 @@ export default function SolarSystemScene({
         ref.mesh.position.set(distance, 0, 0);
         ref.mesh.scale.setScalar(radius);
         ref.label.position.set(0, radius + 0.8, 0);
-        ref.label.scale.set(4.7, 2, 1);
+        ref.label.scale.set(3.7, 1.39, 1);
 
         const oldOrbit = orbitRefs.get(planet.id);
         if (oldOrbit) {
@@ -301,7 +307,7 @@ export default function SolarSystemScene({
       moonMesh.position.set(getDisplayDistance(moon, mode), 0, 0);
       moonMesh.scale.setScalar(moonRadius);
       moonLabel.position.set(0, moonRadius + 0.55, 0);
-      moonLabel.scale.set(3.8, 1.5, 1);
+      moonLabel.scale.set(3.25, 1.22, 1);
 
       const oldMoonOrbit = orbitRefs.get("moon");
       if (oldMoonOrbit) {
@@ -456,7 +462,7 @@ export default function SolarSystemScene({
         if (object.material) {
           const materials = Array.isArray(object.material) ? object.material : [object.material];
           materials.forEach((material) => {
-            ["map", "alphaMap", "normalMap", "roughnessMap", "metalnessMap"].forEach((textureKey) => {
+            ["map", "alphaMap", "normalMap", "roughnessMap", "metalnessMap", "emissiveMap"].forEach((textureKey) => {
               if (material[textureKey] && !material[textureKey].userData?.fromTextureFile) {
                 material[textureKey].dispose();
               }
@@ -487,9 +493,14 @@ export default function SolarSystemScene({
     if (!sceneStateRef.current) return;
     sceneStateRef.current.objectRefs.forEach((ref, id) => {
       ref.mesh.traverse((child) => {
+        if (child.userData.cloudLayer || child.userData.rings || child.userData.atmosphere) return;
         if (child.material?.emissive && id !== "sun") {
-          child.material.emissive.set(id === selectedId ? "#284bff" : "#000000");
-          child.material.emissiveIntensity = id === selectedId ? 0.15 : 0;
+          const baseColor = child.material.userData.baseEmissiveColor || "#000000";
+          const baseIntensity = child.material.userData.baseEmissiveIntensity || 0;
+          const selectedColor = id === "earth" ? "#ffffff" : "#284bff";
+          const selectedIntensity = id === "earth" ? 0.12 : 0.15;
+          child.material.emissive.set(id === selectedId ? selectedColor : baseColor);
+          child.material.emissiveIntensity = id === selectedId ? selectedIntensity : baseIntensity;
         }
       });
     });

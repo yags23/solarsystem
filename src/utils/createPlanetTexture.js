@@ -7,6 +7,19 @@ function makeCanvas(size = 512) {
   return { canvas, context: canvas.getContext("2d") };
 }
 
+function roundedRectPath(context, x, y, width, height, radius) {
+  const safeRadius = Math.min(radius, width / 2, height / 2);
+  context.moveTo(x + safeRadius, y);
+  context.lineTo(x + width - safeRadius, y);
+  context.quadraticCurveTo(x + width, y, x + width, y + safeRadius);
+  context.lineTo(x + width, y + height - safeRadius);
+  context.quadraticCurveTo(x + width, y + height, x + width - safeRadius, y + height);
+  context.lineTo(x + safeRadius, y + height);
+  context.quadraticCurveTo(x, y + height, x, y + height - safeRadius);
+  context.lineTo(x, y + safeRadius);
+  context.quadraticCurveTo(x, y, x + safeRadius, y);
+}
+
 function addNoise(context, size, opacity = 0.18) {
   for (let index = 0; index < 7000; index += 1) {
     const value = Math.floor(120 + Math.random() * 135);
@@ -115,19 +128,60 @@ export function createCloudTexture() {
 }
 
 export function createLabelTexture(text) {
-  const { canvas, context } = makeCanvas(256);
-  context.clearRect(0, 0, 256, 256);
-  context.font = "700 42px Inter, Arial, sans-serif";
+  const width = 512;
+  const height = 192;
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  context.clearRect(0, 0, width, height);
+
+  const panelX = 28;
+  const panelY = 42;
+  const panelWidth = width - panelX * 2;
+  const panelHeight = 104;
+  const radius = 34;
+
+  context.shadowColor = "rgba(30, 178, 255, 0.38)";
+  context.shadowBlur = 28;
+  context.fillStyle = "rgba(7, 15, 32, 0.82)";
+  context.beginPath();
+  roundedRectPath(context, panelX, panelY, panelWidth, panelHeight, radius);
+  context.fill();
+
+  const gradient = context.createLinearGradient(panelX, panelY, panelX + panelWidth, panelY + panelHeight);
+  gradient.addColorStop(0, "rgba(122, 214, 255, 0.92)");
+  gradient.addColorStop(0.44, "rgba(255, 255, 255, 0.62)");
+  gradient.addColorStop(1, "rgba(174, 124, 255, 0.86)");
+  context.shadowBlur = 0;
+  context.strokeStyle = gradient;
+  context.lineWidth = 3;
+  context.beginPath();
+  roundedRectPath(context, panelX, panelY, panelWidth, panelHeight, radius);
+  context.stroke();
+
+  context.fillStyle = "rgba(122, 214, 255, 0.95)";
+  context.beginPath();
+  context.arc(panelX + 46, panelY + panelHeight / 2, 11, 0, Math.PI * 2);
+  context.fill();
+
+  context.font = "800 48px Inter, Arial, sans-serif";
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillStyle = "rgba(9, 18, 36, 0.7)";
-  context.fillRect(28, 94, 200, 68);
-  context.strokeStyle = "rgba(122, 214, 255, 0.78)";
-  context.lineWidth = 2;
-  context.strokeRect(28, 94, 200, 68);
+  context.shadowColor = "rgba(0, 0, 0, 0.72)";
+  context.shadowBlur = 10;
+  context.shadowOffsetY = 2;
   context.fillStyle = "#ffffff";
-  context.fillText(text, 128, 129);
+  context.fillText(text, width / 2 + 18, panelY + panelHeight / 2 + 1, panelWidth - 110);
+
+  context.shadowColor = "transparent";
+  context.fillStyle = "rgba(255, 255, 255, 0.18)";
+  context.beginPath();
+  roundedRectPath(context, panelX + 12, panelY + 10, panelWidth - 24, 28, 20);
+  context.fill();
+
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
   return texture;
 }
