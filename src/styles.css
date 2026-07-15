@@ -286,6 +286,42 @@ button:active {
   display: block;
 }
 
+.webgl-fallback {
+  align-items: center;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(121, 214, 255, 0.16), transparent 36%),
+    linear-gradient(135deg, rgba(5, 12, 28, 0.96), rgba(9, 18, 36, 0.88));
+  color: var(--text);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  min-height: 520px;
+  padding: 28px;
+  text-align: center;
+}
+
+.webgl-fallback > div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  max-width: 560px;
+  padding: 24px;
+  background: rgba(2, 7, 18, 0.68);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+}
+
+.webgl-fallback h2 {
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1;
+  margin: 0 0 12px;
+}
+
+.webgl-fallback p:last-child {
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0;
+}
+
 .scene-help {
   background: rgba(2, 7, 18, 0.66);
   border: 1px solid var(--line);

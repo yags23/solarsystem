@@ -153,6 +153,23 @@ function createLabelSprite(text) {
   return sprite;
 }
 
+function showWebGlFallback(mount) {
+  const fallback = document.createElement("div");
+  fallback.className = "webgl-fallback";
+  fallback.innerHTML = `
+    <div>
+      <p class="panel-kicker">3D view unavailable</p>
+      <h2>WebGL is switched off in this browser</h2>
+      <p>
+        The rest of the activity can still be used, but the interactive planet view needs WebGL.
+        Try Chrome or Edge with hardware acceleration enabled, or use another classroom computer.
+      </p>
+    </div>
+  `;
+  mount.appendChild(fallback);
+  return fallback;
+}
+
 function easeInOutCubic(value) {
   return value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
 }
@@ -185,7 +202,17 @@ export default function SolarSystemScene({
     const camera = new THREE.PerspectiveCamera(52, mount.clientWidth / mount.clientHeight, 0.1, 600);
     camera.position.set(25, 10, 28);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    } catch (error) {
+      console.error("Unable to start the 3D Solar System scene because WebGL is unavailable.", error);
+      const fallback = showWebGlFallback(mount);
+      return () => {
+        mount.removeChild(fallback);
+      };
+    }
+
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
     renderer.setSize(mount.clientWidth, mount.clientHeight);
